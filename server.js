@@ -132,12 +132,11 @@ bullets.forEach(bullet => {
 // Удаляем пули, которые попали
 bullets = bullets.filter(b => !b.hit);
 
-
 // Проверка столкновений врагов с игроками
 for (let id in players) {
   const player = players[id];
 
-   enemies.forEach(enemy => {
+  enemies.forEach(enemy => {
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -152,6 +151,7 @@ for (let id in players) {
     }
   });
 }
+
 
 // Отправка клиентам
 io.emit('updateBullets', bullets);
