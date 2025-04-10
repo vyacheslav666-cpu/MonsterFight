@@ -8,10 +8,17 @@ app.use(express.static('public'));
 
 // массивы игроков и врагов
 
+
 let enemies = [];
 const ENEMY_SPEED = 1;
 
 let players = {};
+
+
+// пули
+let bullets = [];
+const BULLET_SPEED = 10;
+
 
 // спавн врагов
 function spawnEnemy() {
@@ -34,6 +41,29 @@ io.on('connection', socket => {
       socket.broadcast.emit('playerMoved', { id: socket.id, ...data });
     }
   });
+
+// обработка пуль
+socket.on('shoot', ({ targetX, targetY }) => {
+  const shooter = players[socket.id];
+  if (!shooter) return;
+
+  const dx = targetX - shooter.x;
+  const dy = targetY - shooter.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const vx = (dx / dist) * BULLET_SPEED;
+  const vy = (dy / dist) * BULLET_SPEED;
+
+  bullets.push({
+    id: Date.now() + Math.random(),
+    x: shooter.x,
+    y: shooter.y,
+    vx,
+    vy,
+    ownerId: socket.id,
+  });
+});
+
+
 
   socket.on('disconnect', () => {
     delete players[socket.id];
@@ -71,6 +101,21 @@ setInterval(() => {
       }
     }
   });
+
+// Обновление пуль
+bullets.forEach(bullet => {
+  bullet.x += bullet.vx;
+  bullet.y += bullet.vy;
+});
+
+// Удаление старых пуль (вышли за границы)
+bullets = bullets.filter(b =>
+  b.x >= 0 && b.x <= 800 && b.y >= 0 && b.y <= 600
+);
+
+// Отправка клиентам
+io.emit('updateBullets', bullets);
+
 
   // Каждую секунду спавним врага
   if (Math.random() < 0.02) spawnEnemy();

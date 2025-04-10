@@ -9,9 +9,18 @@ let players = {};
 let enemies = [];
 const speed = 2;
 
+// пули
+let bullets = [];
+
 // обработка от сервера (?)
 socket.on('updateEnemies', data => {
   enemies = data;
+});
+
+
+// получение пуль от сервера
+socket.on('updateBullets', data => {
+  bullets = data;
 });
 
 
@@ -71,8 +80,26 @@ enemies.forEach(e => {
   ctx.fill();
 });
 
+// отрисовка пуль
+bullets.forEach(b => {
+  ctx.fillStyle = 'yellow';
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+  ctx.fill();
+});
+
 
   requestAnimationFrame(gameLoop);
 }
+
+// отправка выстрела по клику
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const targetX = e.clientX - rect.left;
+  const targetY = e.clientY - rect.top;
+
+  socket.emit('shoot', { targetX, targetY });
+});
+
 
 gameLoop();
