@@ -113,6 +113,26 @@ bullets = bullets.filter(b =>
   b.x >= 0 && b.x <= 800 && b.y >= 0 && b.y <= 600
 );
 
+
+// Проверка попаданий пуль по врагам
+bullets.forEach(bullet => {
+  enemies.forEach((enemy, index) => {
+    const dx = bullet.x - enemy.x;
+    const dy = bullet.y - enemy.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 15) {
+      // Убрать врага и пулю
+      enemies.splice(index, 1);
+      bullet.hit = true;
+    }
+  });
+});
+
+// Удаляем пули, которые попали
+bullets = bullets.filter(b => !b.hit);
+
+
 // Отправка клиентам
 io.emit('updateBullets', bullets);
 
