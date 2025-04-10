@@ -113,6 +113,46 @@ bullets = bullets.filter(b =>
   b.x >= 0 && b.x <= 800 && b.y >= 0 && b.y <= 600
 );
 
+
+// Проверка попаданий пуль по врагам
+bullets.forEach(bullet => {
+  enemies.forEach((enemy, index) => {
+    const dx = bullet.x - enemy.x;
+    const dy = bullet.y - enemy.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 15) {
+      // Убрать врага и пулю
+      enemies.splice(index, 1);
+      bullet.hit = true;
+    }
+  });
+});
+
+// Удаляем пули, которые попали
+bullets = bullets.filter(b => !b.hit);
+
+
+// Проверка столкновений врагов с игроками
+for (let id in players) {
+  const player = players[id];
+
+   enemies.forEach(enemy => {
+    const dx = player.x - enemy.x;
+    const dy = player.y - enemy.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < 20) {
+      // Телепортируем игрока
+      player.x = Math.random() * 800;
+      player.y = Math.random() * 600;
+
+      // Отправим новое положение игрока
+      io.emit('playerMoved', { id, x: player.x, y: player.y });
+    }
+  });
+}
+
 // Отправка клиентам
 io.emit('updateBullets', bullets);
 
