@@ -2,10 +2,18 @@ const socket = io();
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+
+// массивы врагов и игроков
 let playerId = null;
 let players = {};
-
+let enemies = [];
 const speed = 2;
+
+// обработка от сервера (?)
+socket.on('updateEnemies', data => {
+  enemies = data;
+});
+
 
 socket.on('init', data => {
   playerId = data.id;
@@ -54,6 +62,15 @@ function gameLoop() {
     ctx.fillStyle = id === playerId ? 'blue' : 'red';
     ctx.fillRect(p.x, p.y, 20, 20);
   }
+
+// Враги
+enemies.forEach(e => {
+  ctx.fillStyle = 'green';
+  ctx.beginPath();
+  ctx.arc(e.x, e.y, 15, 0, Math.PI * 2);
+  ctx.fill();
+});
+
 
   requestAnimationFrame(gameLoop);
 }
