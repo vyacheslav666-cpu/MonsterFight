@@ -126,6 +126,10 @@ setInterval(() => {
     });
   });
 
+// Удаляем пули, которые попали
+bullets = bullets.filter(b => !b.hit);
+
+
   if (Math.random() < 0.02) spawnEnemy();
 
   io.emit('updateEnemies', enemies);
